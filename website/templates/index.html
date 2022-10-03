@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"
+      integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <link rel="stylesheet" href="../static/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="../static/css/owl.theme.default.min.css" />
+    <link rel="stylesheet" href="./static/css/style2.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="fire-on"></div>
+    <div class="switch-wrap">
+      <div id="switch">
+        <div id="circle"></div>
+      </div>
+    </div>
+    <div class="section-center">
+      <div class="planet">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+      <div class="shooting-star"></div>
+      <div class="shooting-star-2"></div>
+      <div class="star"></div>
+      <div class="star snd"></div>
+      <div class="star trd"></div>
+      <div class="star fth"></div>
+      <div class="star fith"></div>
+      <div class="circle day"></div>
+      <div class="wood-circle"></div>
+      <div class="wood"></div>
+      <div class="tree-1"></div>
+      <div class="tree-2"></div>
+      <div class="fire">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="smoke">
+        <span class="s-0"></span>
+        <span class="s-1"></span>
+        <span class="s-2"></span>
+        <span class="s-3"></span>
+        <span class="s-4"></span>
+        <span class="s-5"></span>
+        <span class="s-6"></span>
+        <span class="s-7"></span>
+        <span class="s-8"></span>
+        <span class="s-9"></span>
+      </div>
+    </div>
+    <div class="content">
+      <div class="temperature__today">
+        <h2>Hưng's House</h2>
+        <small style="display: block">100N - 100E</small>
+      </div>
+      <div class="info_visual">
+        <div class="today__info">
+          <div class="today__date">
+            <p style="display: inline">Thursday</p>
+            <span class="date"> 03 Oct</span>
+            <h3 class="time">09:30 am</h3>
+          </div>
+          <div class="pollutant">
+            <div class="pollutant__element LPG good">
+              <h3>LPG</h3>
+              <small>good</small>
+              <p>{{lpg}}<span>ppm</span></p>
+            </div>
+            <div class="pollutant__element CO bad">
+              <h3>CO</h3>
+              <small>good</small>
+              <p>{{co}}<span>ppm</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="chart">
+          <canvas id="lineChart" width="500" height="300"></canvas>
+        </div>
+        <div class="chart">
+          <canvas id="LChart" width="500" height="300"></canvas>
+        </div>
+      </div>
+      <div class="predict">
+        <ul class="predict__list owl-carousel owl-theme">
+          {% for i,j in zip(range(LPG_pred|length), range(time|length)) %}
+          <li class="predict__item">
+            <small>{{time[j]}}</small>
+            <div class="predict__item-pollutant">
+              <div class="pollutant-item">
+                <h3>LPG</h3>
+                <small>good</small>
+                <p>{{"%.2f"|format(LPG_pred[i])}}<span>ppm</span></p>
+              </div>
+              <div class="pollutant-item">
+                <h3>CO</h3>
+                <small>good</small>
+                <p>{{"%.2f"|format(CO_pred[i])}}<span>ppm</span></p>
+              </div>
+            </div>
+          </li>
+          {%endfor%}
+        </ul>
+      </div>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"
+      integrity="sha512-QAV866KcCo2YSgj8D7BW+Zn3Fe5wVKTWwzKtWy8mkW+tePcJL7JYilvdfrBFQcdz4ODD48GpIPnhTp9UDI37uw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="../static/js/owl.carousel.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        setTimeout(function () {
+          location.reload(true);
+          alert("The page will now refresh");
+        }, 300000);
+      });
+    </script>
+    <script>
+        var ctx = document.getElementById("lineChart").getContext("2d");
+        gradient = ctx.createLinearGradient(500, 0, 100, 0);
+        gradient.addColorStop(0, 'rgb(204, 219, 16)');
+        gradient.addColorStop(0.4, "rgb(204, 51, 96)");
+        gradient.addColorStop(1, 'rgb(204, 51, 96)');
+      //   rgb(215, 72, 154)
+        gradientFill = ctx.createLinearGradient(500, 0, 100, 0);
+        gradientFill.addColorStop(0, 'rgba(238, 219, 16, 0.6)');
+        gradientFill.addColorStop(0.4, 'rgba(204, 51, 96, 0.6)');
+        gradientFill.addColorStop(1, 'rgba(204, 51, 96, 0.6)');
+        var pieChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: {{labels | safe}},
+            datasets: [
+              {
+                data: {{LPG_data | safe}},
+                fill: true,
+                backgroundColor: gradientFill,
+          pointBackgroundColor: gradient,
+          borderWidth: 3,
+          borderColor: gradient
+              }
+            ]
+          },
+          options: {
+            responsive: false,
+            tooltips: {
+              callbacks: {
+                labels: {{labels | safe}},
+                data: {{LPG_data | safe}}
+              }
+            },
+            plugins: {
+              legend: {
+                  display: false,
+                  labels: {
+                      color: 'white'
+                  }
+              }
+            },
+            scales: {
+              x: {
+                  gridLines: {
+                      display: false,
+                  },
+                  ticks: {
+                    color: "white",
+                  }
+              },
+              y: {
+                  gridLines: {
+                      display: false,
+                  },
+                  ticks: {
+                    color: "white", // this here
+                  }
+              },
+            }
+          }
+        });
+    </script>
+    <script>
+        var ctx = document.getElementById("LChart").getContext("2d");
+        gradient = ctx.createLinearGradient(500, 0, 100, 0);
+        gradient.addColorStop(0, 'rgb(204, 219, 16)');
+        gradient.addColorStop(0.4, "rgb(204, 51, 96)");
+        gradient.addColorStop(1, 'rgb(204, 51, 96)');
+      //   rgb(215, 72, 154)
+        gradientFill = ctx.createLinearGradient(500, 0, 100, 0);
+        gradientFill.addColorStop(0, 'rgba(238, 219, 16, 0.6)');
+        gradientFill.addColorStop(0.4, 'rgba(204, 51, 96, 0.6)');
+        gradientFill.addColorStop(1, 'rgba(204, 51, 96, 0.6)');
+        var pieChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: {{labels | safe}},
+            datasets: [
+              {
+                data: {{CO_data | safe}},
+                fill: true,
+                backgroundColor: gradientFill,
+          pointBackgroundColor: gradient,
+          borderWidth: 3,
+          borderColor: gradient
+              }
+            ]
+          },
+          options: {
+            responsive: false,
+            tooltips: {
+              callbacks: {
+                labels: {{labels | safe}},
+                data: {{CO_data | safe}}
+              }
+            },
+            plugins: {
+              legend: {
+                  display: false,
+                  labels: {
+                      color: 'white'
+                  }
+              }
+            },
+            scales: {
+              x: {
+                  gridLines: {
+                      display: false,
+                  },
+                  ticks: {
+                    color: "white",
+                  }
+              },
+              y: {
+                  gridLines: {
+                      display: false,
+                  },
+                  ticks: {
+                    color: "white", // this here
+                  }
+              },
+            }
+          }
+        });
+    </script>
+
+    <script>
+      $(".owl-carousel").owlCarousel({
+        loop: true,
+        margin: 10,
+        nav: true,
+        responsive: {
+          0: {
+            items: 1,
+          },
+          600: {
+            items: 3,
+          },
+          1000: {
+            items: 8,
+          },
+        },
+      });
+    </script>
+
+    <script src="./static/js/script.js"></script>
+  </body>
+</html>
