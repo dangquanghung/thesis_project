@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import *
 from math import sqrt
+from tensorflow.keras.models import load_model
+
+
 date_format_str = '%Y-%m-%d %H:%M:%S'
 
 data = requests.get(
@@ -152,6 +155,13 @@ def LR_Algo_for_CO(column, Fill_data):
     print('coefficient of determination:', regressor.score(X_train, y_train))
     print(CO_pred)
     return CO_pred
+
+def LSTM_predict(data, model_name):
+    # data should be a list of 4 numbers with shape (1, 4).
+    # For example, data = [[1,2,3,4]] is valid while data = [1,2,3,4] is not valid
+    model = load_model(model_name)
+    data = data.reshape(-1, 4, 1).astype(np.float32)
+    return model.predict(data)[0]
 
 
 if __name__ == "__main__":
