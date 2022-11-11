@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import requests
 import numpy as np
 import pandas as pd
@@ -32,16 +32,25 @@ def callAPI():
 scheduler = BackgroundScheduler()
 
 
+# Hence, in the front-end, the form should call something like 
+# http://<your-domain-uri>?algorithm=<the algorithm you want to see>
 @app.route('/')
 def getInfo():
     # preprocessing
     df = callAPI()
     data = Data(df)
     fill_data = FillMissingData(data)
+        
 
     # predict LPG
-    LPG_pred = ARIMA_agorithm(fill_data)
-    LPG_pred = time_predict(filldata=fill_data, algorithm=LPG_pred)
+    if request.args.get("algorithm") is None or request.args.get("algorithm") == "" or request.args.get("algorithm") == "ARIMA":
+        LPG_pred = ARIMA_agorithm(fill_data)
+        LPG_pred = time_predict(filldata=fill_data, algorithm=LPG_pred)
+    # add more option by adding condition for algorithm
+    # example:
+    # elif request.args.get("algorithm") == "lstm":
+    #     <do something>
+    
     CO_pred = LR_Algo_for_CO(LPG_pred, fill_data)
 
     # New record
