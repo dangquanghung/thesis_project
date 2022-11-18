@@ -156,12 +156,26 @@ def LR_Algo_for_CO(column, Fill_data):
     print(CO_pred)
     return CO_pred
 
-def LSTM_predict(data, model_name):
+def LSTM_predict(data, attr, model_name):
     # data should be a list of 4 numbers with shape (1, 4).
     # For example, data = [[1,2,3,4]] is valid while data = [1,2,3,4] is not valid
+    size = int(len(data) * 0.66)
+    time_data = data[0:size]
+    index_future_minutes = justOneMinute(time_data, 34)
     model = load_model(model_name)
-    data = data.reshape(-1, 4, 1).astype(np.float32)
-    return model.predict(data)[0]
+    init_data = data.loc[:, attr].values[-4:]
+    predicted_values = []
+    
+    for _ in range(len(index_future_minutes)):
+        init_data = init_data.reshape(-1, 4, 1)
+        new_data = model.predict(init_data)
+        init_data[:3] = init_data[-3:]
+        init_data[-1] = float(new_data[0])
+        predicted_values.append(float(new_data[0]))
+    predicted_df = pd.DataFrame({"predicted": predicted_values})
+    predicted_df['date'] = index_future_minutes
+    predicted_df.index = index_future_minutes
+    return predicted_df
 
 
 if __name__ == "__main__":
