@@ -3,7 +3,8 @@ import requests
 import numpy as np
 import pandas as pd
 from apscheduler.schedulers.background import BackgroundScheduler
-from algorithm import FillMissingData, Data, ARIMA_agorithm, LR_Algo_for_CO, time_predict
+from algorithm import FillMissingData, Data, ARIMA_agorithm, LR_Algo_for_CO, time_predict, LSTM_predict
+from tensorflow.keras.models import load_model
 
 
 app = Flask(__name__)
@@ -48,8 +49,8 @@ def getInfo():
         LPG_pred = time_predict(filldata=fill_data, algorithm=LPG_pred)
     # add more option by adding condition for algorithm
     # example:
-    # elif request.args.get("algorithm") == "lstm":
-    #     <do something>
+    if request.args.get("algorithm") == "lstm":
+        LPG_pred = LSTM_predict(fill_data, "LPG", "../training/model/lpg_model.h5")
     
     CO_pred = LR_Algo_for_CO(LPG_pred, fill_data)
 
@@ -63,8 +64,6 @@ def getInfo():
     CO_data = [co for co in df['CO'].values[-20:]]
     time = [str(date_predict).split("T", 1)[1].rpartition(":")[0]
             for date_predict in LPG_pred['date'].values[-20:]]
-
-    print(labels)
 
     if any(LPG_data) >= 400:
         return 'Dangerous Gas! CHECK the gas contains'
