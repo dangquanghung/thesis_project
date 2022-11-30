@@ -9,6 +9,17 @@ from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import *
 from math import sqrt
 from tensorflow.keras.models import load_model
+from typing import List
+
+
+def make_tabular_ts(items: List[float], time_lag=4):
+    # should only use for linear regression and stuff
+    output = []
+    
+    for i in range(len(items) - time_lag - 1):
+        output.append(items[i:i + time_lag + 1])
+        
+    return np.array(output).astype(np.float32)
 
 
 date_format_str = '%Y-%m-%d %H:%M:%S'
@@ -172,6 +183,40 @@ def LSTM_predict(data, attr, model_name):
         init_data[:3] = init_data[-3:]
         init_data[-1] = float(new_data[0])
         predicted_values.append(float(new_data[0]))
+    predicted_df = pd.DataFrame({"predicted": predicted_values})
+    predicted_df['date'] = index_future_minutes
+    predicted_df.index = index_future_minutes
+    return predicted_df
+
+def LRMA_predict(df, column):
+    rolling_mean = df.loc[:, column].rolling(window=10).mean().dropna()
+    train = rolling_mean.iloc[:int(len(rolling_mean) * 0.6)]
+    test = rolling_mean.iloc[int(len(rolling_mean) * 0.6):]
+    
+    train_data = make_tabular_ts(train.tolist())
+    test_data = make_tabular_ts(test.tolist())
+
+    X_train, y_train = train_data[:, :-1], train_data[:, -1].flatten()
+
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    
+    init_mean_data = X_train[-1]
+    index = len(train)
+    init_data = df.loc[:, column].iloc[index:index + 10].tolist()
+    init_data[-1] = 0 # we haven't known this value yet
+    index_future_minutes = justOneMinute(df, 34)
+    predicted_values = []
+    
+    for _ in range(len(index_future_minutes)):
+        new_data = model.predict([init_mean_data])
+        actual_value = 10 * new_data[0] - sum(init_data[:-1])
+        predicted_values.append(actual_value)
+        init_data[-1] = actual_value
+        init_data = init_data[1:]
+        init_data.append(0)
+        init_mean_data[:-1] = init_mean_data[1:]
+        init_mean_data[-1] = float(new_data[0])
     predicted_df = pd.DataFrame({"predicted": predicted_values})
     predicted_df['date'] = index_future_minutes
     predicted_df.index = index_future_minutes
