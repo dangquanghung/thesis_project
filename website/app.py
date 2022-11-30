@@ -47,12 +47,19 @@ def getInfo():
     if request.args.get("algorithm") is None or request.args.get("algorithm") == "" or request.args.get("algorithm") == "ARIMA":
         LPG_pred = ARIMA_agorithm(fill_data)
         LPG_pred = time_predict(filldata=fill_data, algorithm=LPG_pred)
+        print("lpg 1", LPG_pred)
+        CO_pred = LR_Algo_for_CO(LPG_pred, fill_data)
+        print("co 1", CO_pred)
     # add more option by adding condition for algorithm
     # example:
     if request.args.get("algorithm") == "lstm":
         LPG_pred = LSTM_predict(fill_data, "LPG", "../training/model/lpg_model.h5")
-    
-    CO_pred = LR_Algo_for_CO(LPG_pred, fill_data)
+        print("lpg 2", LPG_pred)
+        CO_pred = LSTM_predict(fill_data, "CO", "../training/model/co_model.h5")
+        print("co2",CO_pred)
+        CO_pred = CO_pred["predicted"].values
+        
+
 
     # New record
     co = df['CO'].values[-1]
