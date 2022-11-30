@@ -86,9 +86,9 @@ def justOneMinute(data, num_prediction):
     return li
 
 
-def ARIMA_agorithm(CleanData):
+def ARIMA_agorithm(CleanData, column='LPG'):
     data = CleanData
-    X = data['LPG'].values
+    X = data[column].values
     size = int(len(X) * 0.66)
     train, test = X[0:size], X[size:len(X)]
     print("train here: ", train)
