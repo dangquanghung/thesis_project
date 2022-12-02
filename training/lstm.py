@@ -15,7 +15,7 @@ args = vars(parser.parse_args())
 
 
 ts = TimeSeriesData()
-df = ts.get_data()
+df = ts.get_data2()
 print(len(df))
 
 col = args["column"]

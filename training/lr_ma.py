@@ -11,7 +11,7 @@ parser.add_argument("--column_name", type=str, default="CO")
 args = vars(parser.parse_args())
 
 ts = TimeSeriesData()
-df = ts.get_data()
+df = ts.get_data2()
 
 col = args["column_name"]
 
@@ -27,11 +27,12 @@ X_test, y_test = test_data[:, :-1], test_data[:, -1].flatten()
 
 model = LinearRegression()
 model.fit(X_train, y_train)
-print(model.score(X_test, y_test))
+print("score lnma: ",model.score(X_test, y_test))
 
 
 prediction = list(X_test[0]) + list(model.predict(X_test))
 prediction = pd.DataFrame(prediction, index = test.index[:-1])
+print(prediction)
 
 fig, (ax1, ax2) = plt.subplots(2, 1)
 ax1.plot(train, color="b")
